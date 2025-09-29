@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { FaBook, FaInbox, FaPaperPlane, FaPlus, FaExchangeAlt, FaCheck, FaTimes, FaSync } from 'react-icons/fa';
+import { FaBook, FaInbox, FaPaperPlane, FaPlus, FaExchangeAlt, FaCheck, FaTimes, FaSync, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 
 const Dashboard = () => {
   const { user, refreshData, triggerRefresh } = useAuth();
@@ -13,6 +13,7 @@ const Dashboard = () => {
   const [sentRequests, setSentRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingRequest, setUpdatingRequest] = useState(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Dashboard data fetch karo - refreshData change hone par automatically
   useEffect(() => {
@@ -107,6 +108,28 @@ const Dashboard = () => {
     }
   };
 
+  // Scroll handlers for mobile tabs
+  const scrollTabs = (direction) => {
+    const tabsContainer = document.getElementById('tabs-container');
+    const scrollAmount = 200;
+    
+    if (tabsContainer) {
+      if (direction === 'left') {
+        tabsContainer.scrollLeft -= scrollAmount;
+      } else {
+        tabsContainer.scrollLeft += scrollAmount;
+      }
+      setScrollPosition(tabsContainer.scrollLeft);
+    }
+  };
+
+  // Tabs data
+  const tabs = [
+    { id: 'myBooks', name: 'My Books', icon: FaBook, count: myBooks.length },
+    { id: 'received', name: 'Received', icon: FaInbox, count: receivedRequests.length },
+    { id: 'sent', name: 'Sent', icon: FaPaperPlane, count: sentRequests.length }
+  ];
+
   // Loading state
   if (loading) {
     return (
@@ -194,28 +217,53 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation - Mobile Responsive */}
         <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
-              {[
-                { id: 'myBooks', name: 'My Books', icon: FaBook, count: myBooks.length },
-                { id: 'received', name: 'Received Requests', icon: FaInbox, count: receivedRequests.length },
-                { id: 'sent', name: 'Sent Requests', icon: FaPaperPlane, count: sentRequests.length }
-              ].map((tab) => {
+          <div className="border-b border-gray-200 relative">
+            {/* Scroll Buttons for Mobile */}
+            <div className="md:hidden absolute left-0 top-0 bottom-0 flex items-center z-10 bg-white">
+              <button
+                onClick={() => scrollTabs('left')}
+                className="h-full px-2 bg-white bg-opacity-80 hover:bg-gray-50 transition-colors"
+              >
+                <FaChevronLeft className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
+            
+            <div className="md:hidden absolute right-0 top-0 bottom-0 flex items-center z-10 bg-white">
+              <button
+                onClick={() => scrollTabs('right')}
+                className="h-full px-2 bg-white bg-opacity-80 hover:bg-gray-50 transition-colors"
+              >
+                <FaChevronRight className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
+
+            {/* Tabs Container */}
+            <nav 
+              id="tabs-container"
+              className="flex overflow-x-auto scrollbar-hide md:overflow-visible md:flex-nowrap -mb-px scroll-smooth"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {tabs.map((tab) => {
                 const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 flex items-center justify-center py-4 px-1 text-center border-b-2 font-medium text-sm ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    className={`flex-shrink-0 flex items-center justify-center py-4 px-4 md:px-6 text-center border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                      isActive
+                        ? 'border-blue-500 text-blue-600 bg-blue-50 md:bg-transparent'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 md:hover:bg-transparent'
                     }`}
+                    style={{ minWidth: '120px' }}
                   >
-                    <Icon className="h-5 w-5 mr-2" />
-                    {tab.name}
+                    <Icon className={`h-4 w-4 mr-2 ${isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+                    <span className="hidden xs:inline">
+                      {tab.name}
+                    </span>
                     <span className="ml-2 bg-gray-200 text-gray-700 py-0.5 px-2 rounded-full text-xs">
                       {tab.count}
                     </span>
@@ -226,7 +274,7 @@ const Dashboard = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             {/* My Books Tab */}
             {activeTab === 'myBooks' && (
               <div>
@@ -244,11 +292,11 @@ const Dashboard = () => {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {myBooks.map((book) => (
                       <div key={book._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <div className="flex items-start justify-between mb-3">
-                          <h4 className="font-semibold text-gray-900 line-clamp-2">{book.title}</h4>
+                          <h4 className="font-semibold text-gray-900 text-sm md:text-base line-clamp-2">{book.title}</h4>
                           <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                             book.available 
                               ? 'bg-green-100 text-green-800' 
@@ -257,10 +305,10 @@ const Dashboard = () => {
                             {book.available ? 'Available' : 'Swapped'}
                           </span>
                         </div>
-                        <p className="text-gray-600 text-sm mb-2">by {book.author}</p>
-                        <p className="text-gray-500 text-sm mb-2">Condition: {book.condition}</p>
+                        <p className="text-gray-600 text-xs md:text-sm mb-2">by {book.author}</p>
+                        <p className="text-gray-500 text-xs md:text-sm mb-2">Condition: {book.condition}</p>
                         {book.description && (
-                          <p className="text-gray-500 text-sm mb-3 line-clamp-2">{book.description}</p>
+                          <p className="text-gray-500 text-xs md:text-sm mb-3 line-clamp-2">{book.description}</p>
                         )}
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-500">
@@ -290,15 +338,15 @@ const Dashboard = () => {
                   <div className="space-y-4">
                     {receivedRequests.map((request) => (
                       <div key={request._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{request.book.title}</h4>
-                            <p className="text-gray-600 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 text-sm md:text-base">{request.book.title}</h4>
+                            <p className="text-gray-600 text-xs md:text-sm">
                               Requested by {request.requester.name}
                             </p>
-                            <p className="text-gray-500 text-sm">{request.requester.email}</p>
+                            <p className="text-gray-500 text-xs md:text-sm">{request.requester.email}</p>
                           </div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
                             request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                             request.status === 'accepted' ? 'bg-green-100 text-green-800' :
                             'bg-red-100 text-red-800'
@@ -308,13 +356,13 @@ const Dashboard = () => {
                         </div>
                         
                         {request.message && (
-                          <p className="text-gray-600 text-sm mb-3 bg-white p-3 rounded border">
+                          <p className="text-gray-600 text-xs md:text-sm mb-3 bg-white p-3 rounded border">
                             "{request.message}"
                           </p>
                         )}
 
                         {request.status === 'pending' && (
-                          <div className="flex space-x-2">
+                          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                             <button
                               onClick={() => updateRequestStatus(request._id, 'accepted')}
                               disabled={updatingRequest === request._id}
@@ -336,7 +384,7 @@ const Dashboard = () => {
 
                         {request.status === 'accepted' && (
                           <div className="bg-green-50 border border-green-200 rounded p-3">
-                            <p className="text-green-800 text-sm">
+                            <p className="text-green-800 text-xs md:text-sm">
                               You accepted this swap request. Please contact {request.requester.name} at {request.requester.email} to arrange the book exchange.
                             </p>
                           </div>
@@ -368,15 +416,15 @@ const Dashboard = () => {
                   <div className="space-y-4">
                     {sentRequests.map((request) => (
                       <div key={request._id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{request.book.title}</h4>
-                            <p className="text-gray-600 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 gap-2">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 text-sm md:text-base">{request.book.title}</h4>
+                            <p className="text-gray-600 text-xs md:text-sm">
                               Owner: {request.owner.name}
                             </p>
-                            <p className="text-gray-500 text-sm">{request.owner.email}</p>
+                            <p className="text-gray-500 text-xs md:text-sm">{request.owner.email}</p>
                           </div>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium self-start sm:self-auto ${
                             request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                             request.status === 'accepted' ? 'bg-green-100 text-green-800' :
                             'bg-red-100 text-red-800'
@@ -386,14 +434,14 @@ const Dashboard = () => {
                         </div>
                         
                         {request.message && (
-                          <p className="text-gray-600 text-sm mb-3 bg-white p-3 rounded border">
+                          <p className="text-gray-600 text-xs md:text-sm mb-3 bg-white p-3 rounded border">
                             Your message: "{request.message}"
                           </p>
                         )}
 
                         {request.status === 'accepted' && (
                           <div className="bg-green-50 border border-green-200 rounded p-3">
-                            <p className="text-green-800 text-sm">
+                            <p className="text-green-800 text-xs md:text-sm">
                               Your request was accepted! Please contact {request.owner.name} at {request.owner.email} to arrange the book exchange.
                             </p>
                           </div>
@@ -401,7 +449,7 @@ const Dashboard = () => {
 
                         {request.status === 'declined' && (
                           <div className="bg-red-50 border border-red-200 rounded p-3">
-                            <p className="text-red-800 text-sm">
+                            <p className="text-red-800 text-xs md:text-sm">
                               Your request was declined. You can browse other available books.
                             </p>
                           </div>
@@ -415,6 +463,17 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Custom CSS for hiding scrollbar */}
+      <style jsx>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 };

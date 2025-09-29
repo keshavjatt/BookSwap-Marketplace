@@ -27,20 +27,27 @@ const Navbar = () => {
           {/* Logo */}
           <Link 
             to="/" 
-            className="flex items-center space-x-2 text-xl font-bold text-blue-600"
+            className="flex items-center space-x-3 group"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
-            <FaBook className="text-2xl" />
-            <span>BookSwap</span>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-200"></div>
+              <div className="relative bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg">
+                <FaBook className="text-white text-xl" />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                BookSwap
+              </span>
+              <span className="text-xs font-medium text-gray-500 -mt-1">
+                Marketplace
+              </span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/books" 
-              className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
-            >
-              Browse Books
-            </Link>
             
             {isAuthenticated ? (
               <>
@@ -50,14 +57,7 @@ const Navbar = () => {
                 >
                   Dashboard
                 </Link>
-                <Link 
-                  to="/add-book" 
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Add Book
-                </Link>
                 <div className="flex items-center space-x-3">
-                  <span className="text-gray-700">Hello, {user?.name}</span>
                   <button
                     onClick={handleLogout}
                     className="flex items-center space-x-1 text-gray-700 hover:text-red-600 transition-colors"
@@ -98,13 +98,6 @@ const Navbar = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-              <Link 
-                to="/books" 
-                className="text-gray-700 hover:text-blue-600 font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Browse Books
-              </Link>
               
               {isAuthenticated ? (
                 <>
@@ -115,18 +108,7 @@ const Navbar = () => {
                   >
                     Dashboard
                   </Link>
-                  <Link 
-                    to="/add-book" 
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium text-center"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Add Book
-                  </Link>
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-                    <span className="text-gray-700 flex items-center space-x-2">
-                      <FaUser />
-                      <span>{user?.name}</span>
-                    </span>
                     <button
                       onClick={handleLogout}
                       className="flex items-center space-x-1 text-red-600 hover:text-red-700 transition-colors"
