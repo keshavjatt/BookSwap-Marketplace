@@ -44,7 +44,7 @@ BookSwap Marketplace is a modern **MERN stack** web application that enables boo
 - cd BookSwap-Marketplace
 
 ### 2️⃣ Backend Setup
-**Create a .env file in the backend root directory:**
+**Create a .env file inside the backend folder with the following variables:**
 
 MONGODB_URI=mongodb://localhost:27017/Bookswap_DB
 - JWT_SECRET=abcd123
@@ -61,7 +61,7 @@ MONGODB_URI=mongodb://localhost:27017/Bookswap_DB
 
 
 ### 3️⃣ Frontend Setup
-**Create a .env file in the frontend root directory:**
+**Create a .env file inside the frontend folder with the following variable:**
 
 - VITE_API_BASE_URL=http://localhost:5000/api
 
